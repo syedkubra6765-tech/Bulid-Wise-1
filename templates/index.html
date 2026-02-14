@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConstructAI | Cinematic Construction Planner</title>
+    <meta name="description"
+        content="AI-powered construction planning with IBM Granite. Get instant material calculations and intelligent schedules.">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+    <!-- Three.js Canvas Background -->
+    <canvas id="bg-canvas"></canvas>
+
+    <!-- Ambient Glow Orbs -->
+    <div class="glow-orb glow-orb-1"></div>
+    <div class="glow-orb glow-orb-2"></div>
+    <div class="glow-orb glow-orb-3"></div>
+
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav" id="topNav">
+        <div class="nav-brand">
+            <div class="brand-icon">
+                <i class="fa-solid fa-helmet-safety"></i>
+            </div>
+            <span class="brand-name">Construct<span class="accent">AI</span></span>
+        </div>
+        <div class="nav-center">
+            <a href="#" class="nav-link active"><i class="fa-solid fa-compass-drafting"></i> Planning</a>
+            <a href="#" class="nav-link"><i class="fa-solid fa-chart-line"></i> Analytics</a>
+            <a href="#" class="nav-link"><i class="fa-solid fa-person-digging"></i> Resources</a>
+        </div>
+        <div class="nav-status">
+            <span class="pulse-dot"></span>
+            <span class="status-text">Granite 3.3 · Local</span>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <h1 class="hero-title">
+            <span class="line line-1">Build Smarter.</span>
+            <span class="line line-2">Plan Faster.</span>
+            <span class="line line-3 gradient-text">AI-Powered.</span>
+        </h1>
+        <p class="hero-subtitle">Deterministic calculations + local AI intelligence for construction planning.</p>
+    </section>
+
+    <!-- Main Application Container -->
+    <div class="app-wrapper" id="appWrapper">
+        <!-- Input Panel (Glass Card) -->
+        <div class="glass-panel input-panel" id="inputPanel">
+            <div class="panel-header">
+                <div class="panel-icon"><i class="fa-solid fa-sliders"></i></div>
+                <h2>Project Parameters</h2>
+            </div>
+            <form id="planningForm">
+                <div class="form-group">
+                    <label for="area">
+                        <i class="fa-solid fa-vector-square"></i>
+                        Built-up Area <small>(Sq. Yards)</small>
+                    </label>
+                    <input type="number" id="area" name="area" placeholder="e.g., 1000" required>
+                </div>
+                <div class="form-group">
+                    <label for="floors">
+                        <i class="fa-solid fa-building"></i>
+                        Number of Floors <small>(G + n)</small>
+                    </label>
+                    <input type="number" id="floors" name="floors" placeholder="e.g., 2" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="timeline">
+                            <i class="fa-solid fa-clock"></i>
+                            Timeline <small>(Days)</small>
+                        </label>
+                        <input type="number" id="timeline" name="timeline" placeholder="Auto">
+                    </div>
+                    <div class="form-group">
+                        <label for="location">
+                            <i class="fa-solid fa-location-dot"></i>
+                            Location
+                        </label>
+                        <select id="location" name="location">
+                            <option value="Standard">Urban</option>
+                            <option value="Metropolitan">Metro</option>
+                            <option value="Rural">Rural</option>
+                            <option value="Hill Station">Hill</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="generate-btn" id="generateBtn">
+                    <span class="btn-text">Generate Plan</span>
+                    <span class="btn-icon"><i class="fa-solid fa-wand-magic-sparkles"></i></span>
+                    <span class="loader hidden"></span>
+                </button>
+            </form>
+        </div>
+
+        <!-- Results Panel -->
+        <section id="resultsPanel" class="results-panel hidden">
+            <!-- Stat Cards Row -->
+            <div class="stats-row" id="statsRow">
+                <div class="glass-panel stat-card" data-tilt>
+                    <div class="stat-icon timeline-icon"><i class="fa-solid fa-calendar-day"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Timeline</span>
+                        <span class="stat-value" id="resTimeline">--</span>
+                    </div>
+                </div>
+                <div class="glass-panel stat-card" data-tilt>
+                    <div class="stat-icon material-icon"><i class="fa-solid fa-cubes-stacked"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Built-up Area</span>
+                        <span class="stat-value" id="resMaterial">--</span>
+                    </div>
+                </div>
+                <div class="glass-panel stat-card" data-tilt>
+                    <div class="stat-icon workforce-icon"><i class="fa-solid fa-users-gear"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">Workforce</span>
+                        <span class="stat-value" id="resWorkforce">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Material Breakdown -->
+            <div class="glass-panel material-panel" data-tilt>
+                <div class="panel-header">
+                    <div class="panel-icon material-icon"><i class="fa-solid fa-truck-ramp-box"></i></div>
+                    <h2>Material Requirements</h2>
+                </div>
+                <ul id="materialList" class="material-grid">
+                    <!-- Populated by JS -->
+                </ul>
+            </div>
+
+            <!-- AI Analysis Tabs -->
+            <div class="glass-panel ai-panel">
+                <div class="panel-header">
+                    <div class="panel-icon ai-icon"><i class="fa-solid fa-brain"></i></div>
+                    <h2>AI Analysis</h2>
+                    <span class="ai-badge">Granite 3.3</span>
+                </div>
+                <div class="tabs-container">
+                    <div class="tabs">
+                        <button class="tab-btn active" onclick="openTab(event, 'schedule')">
+                            <i class="fa-solid fa-bars-progress"></i> Schedule
+                        </button>
+                        <button class="tab-btn" onclick="openTab(event, 'labor')">
+                            <i class="fa-solid fa-people-group"></i> Labor
+                        </button>
+                        <button class="tab-btn" onclick="openTab(event, 'costs')">
+                            <i class="fa-solid fa-coins"></i> Costs
+                        </button>
+                        <button class="tab-btn" onclick="openTab(event, 'blueprint')">
+                            <i class="fa-solid fa-drafting-compass"></i> Blueprint
+                        </button>
+                    </div>
+                    <div id="schedule" class="tab-content active">
+                        <div class="timeline-visual" id="scheduleTimeline"></div>
+                    </div>
+                    <div id="labor" class="tab-content">
+                        <div id="laborChart"></div>
+                    </div>
+                    <div id="costs" class="tab-content">
+                        <div id="costBreakdown"></div>
+                    </div>
+                    <div id="blueprint" class="tab-content">
+                        <div id="blueprintContent"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="/static/script.js"></script>
+</body>
+
+</html>
